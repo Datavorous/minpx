@@ -4,8 +4,15 @@ minpx</h1>
 
 ## Screenshots
 <img src="https://github.com/Datavorous/minpx/blob/main/media/2.PNG?raw=true">
-<b>
+<br>
 <img src="https://github.com/Datavorous/minpx/blob/main/media/3.PNG?raw=true">
+
+## Introduction
+This is merely a hobby project. I'll only add essential features to it which I think are required.<br>
+You may modify it and use it yourself btw.
+
+## Features
+Need to write 
 
 ## Controls
 Need to write
