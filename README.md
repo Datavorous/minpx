@@ -23,7 +23,7 @@ You may modify it and use it yourself btw.
 ## Controls
 
 * ```LMB(Down)``` - Draw Pixels On Canvas
-* ```LMB(Pressed)``` - Pick New Color 
+* ```LMB(Pressed Once)``` - Pick New Color 
 * ```RMB(Down)``` - Erase Pixels On Canvas
 * ```[``` and ```]``` - Decrease Or Increase Brush/Eraser Size
 * ```E``` - Export Image
