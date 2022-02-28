@@ -21,4 +21,5 @@ You may modify it and use it yourself btw.
 * Frame By Frame Animation (WIP)
 
 ## Controls
-Need to write
+
+
