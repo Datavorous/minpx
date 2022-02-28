@@ -35,4 +35,4 @@ You may modify it and use it yourself btw.
 
 ## Warning 
 
-Comment down these lines -
+Comment down the lines ```231 - 242``` , because animation system is not functional yet.
