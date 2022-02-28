@@ -22,4 +22,13 @@ You may modify it and use it yourself btw.
 
 ## Controls
 
-
+* ```LMB(Down)``` - Draw Pixels On Canvas
+* ```LMB(Pressed)``` - Pick New Color 
+* ```RMB(Down)``` - Erase Pixels On Canvas
+* ```[``` and ```]``` - Decrease Or Increase Brush/Eraser Size
+* ```E``` - Export Image
+* ```M``` - Toggle Mirror Mode
+* ```C``` - Clear Canvas
+* ```G``` - Toggle Grid Display
+* ```X``` - Toggle Centre Grid Display
+* ```P``` - Toggle Between 3 Color Palettes
