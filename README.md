@@ -12,7 +12,13 @@ This is merely a hobby project. I'll only add essential features to it which I t
 You may modify it and use it yourself btw.
 
 ## Features
-Need to write 
+* Low Memory Footprint
+* Multiple Color Palettes
+* ```.png``` Export
+* Mirror
+* Adjustable Brush/Eraser Size
+* Grid Lines 
+* Frame By Frame Animation (WIP)
 
 ## Controls
 Need to write
