@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include <vector>
 #define SCREEN_H 450
-#define SCREEN_W 800
+#define SCREEN_W 560
 using namespace std;
 
 const int canvas_side = 420;
@@ -9,25 +9,29 @@ const int NO_PIXEL = 32;
 const int pixel_size = canvas_side/NO_PIXEL;
 const int grid_x = 10;
 const int grid_y = 10;
-const int colorOptions_x = grid_x+canvas_side+10;
-const int colorOptions_y = 120;
-
-
-short m_x,m_y;
+const int colorPalette_x = grid_x+canvas_side+10;
+const int colorPalette_y = 120;
 int img_no = 0;
-int r = 170;
-int g = 120;
-int b = 255;
-int a = 255;
+int pencil_size = 1;
+int pixel_size_in_palette = 8;
+int switch_palette = 1;
+int session;
+short m_x,m_y;
+char *status = "";
+bool mirror = false;
+bool grid_lines = false;
+bool show_centre = false;
 
-Color present_color = (Color){r,g,b,a};
 vector< vector<Color> > grid;
 vector<vector< vector<Color> >> frames;
 
-bool grid_lines = false;
-char *status = "";
-Image colors_img;
-Color* list_colors;
+Color present_color;
+Color* color_list1;
+Color* color_list2;
+Color* color_list3;
+Image color_palette_img1;
+Image color_palette_img2;
+Image color_palette_img3;
 
 void keyStrokes(void);
 void drawGrid(void);
@@ -36,17 +40,20 @@ void drawColors(int,int);
 
 int main(void)
 {
-    colors_img = LoadImage("color.png"); 
-    list_colors = LoadImageColors(colors_img);
-    UnloadImage(colors_img);
-    present_color = list_colors[0];
-/*
-    Image checked = GenImageChecked(canvas_side, canvas_side, pixel_size, pixel_size,(Color){230,230,230,255},(Color){180,180,180,255});   
-    Texture2D checkedTex =  LoadTextureFromImage(checked);
-    DrawTexture(checkedTex, grid_x, grid_y, (Color){0,0,0,0});
-    UnloadTexture(checkedTex);
-    UnloadImage(checked);
-*/
+    session = GetRandomValue(0,1000);
+    color_palette_img1 = LoadImage("res/palette1.png"); 
+    color_list1 = LoadImageColors(color_palette_img1);
+    UnloadImage(color_palette_img1);
+    
+    color_palette_img2 = LoadImage("res/palette2.png"); 
+    color_list2 = LoadImageColors(color_palette_img2);
+    UnloadImage(color_palette_img2);
+    
+    color_palette_img3 = LoadImage("res/palette3.png"); 
+    color_list3 = LoadImageColors(color_palette_img3);
+    UnloadImage(color_palette_img3);
+
+    present_color = color_list1[0];
     for(int row=0;row<=NO_PIXEL;row++)
     {
         vector<Color> i_grid;
@@ -54,58 +61,109 @@ int main(void)
             i_grid.push_back((Color){0,0,0,0});
         grid.push_back(i_grid);
     }
-    frames.push_back(grid);
-    
-    InitWindow(560, 450, "minpx");
-    SetTargetFPS(60);               
+    //frames.push_back(grid);
+
+    InitWindow(SCREEN_W, SCREEN_H, "minpx");
+    Texture2D checked = LoadTexture("res/checked.png");
+    Texture2D checked2 = LoadTexture("res/checked2.png");
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground((Color){12,12,12}); 
-        //(Color){r,g,b,a};
-        drawGrid();
-        drawColors(5,20);
-        printData();
+            DrawTexture(checked,grid_x,grid_y,WHITE);
+            DrawTexture(checked2,grid_x+canvas_side+10,grid_y,WHITE);
+            drawGrid();
+            drawColors(5,20);
+            printData();
         EndDrawing();
         keyStrokes(); 
     }
+    UnloadTexture(checked);
+    UnloadTexture(checked2);
     CloseWindow();    
 }
-
-
 void keyStrokes()
 {
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if ((GetMouseX()<=canvas_side+grid_x) && (GetMouseY()<=canvas_side+grid_y) && (GetMouseX()>=grid_x) && (GetMouseY()>=grid_y))
             {
-                grid[(int)((GetMouseX()-grid_x)/pixel_size)][(int)((GetMouseY()-grid_y)/pixel_size)] = present_color;
+                for (int i = -pencil_size/2; i <= pencil_size/2; i++)
+                    for (int y = -pencil_size/2; y <= pencil_size/2; y++)
+                        if ((((int)((GetMouseX()-grid_x)/pixel_size)+i)>-1 && ((int)((GetMouseX()-grid_x)/pixel_size)+i)<NO_PIXEL) && (((int)((GetMouseY()-grid_y)/pixel_size)+y)>-1 && ((int)((GetMouseY()-grid_y)/pixel_size)+y)<NO_PIXEL))
+                        {
+
+                            if (mirror)
+                            {
+                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                                grid[(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                            }
+                            else
+                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                        }
                 status = "Pencil";
             }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-            {
-                if ((GetMouseX()<=colorOptions_x+5*20) && (GetMouseY()<=colorOptions_y+7*20) && (GetMouseX()>=colorOptions_x) && (GetMouseY()>=colorOptions_y))
-                {
-                    present_color = list_colors[((GetMouseX()-colorOptions_x)/20)+((GetMouseY()-colorOptions_y)/20)*5];
-                    status = "New color picked";
-                }
-            }
-
         }    
+
     if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT))
         {
         if ((GetMouseX()<=canvas_side+grid_x) && (GetMouseY()<=canvas_side+grid_y) && (GetMouseX()>=grid_x) && (GetMouseY()>=grid_y))
-            grid[(int)((GetMouseX()-grid_x)/pixel_size)][(int)((GetMouseY()-grid_y)/pixel_size)] = (Color){0,0,0,0};
+        {
+            for (int i = -pencil_size/2; i <= pencil_size/2; i++)
+                    for (int y = -pencil_size/2; y <= pencil_size/2; y++)
+                        if ((((int)((GetMouseX()-grid_x)/pixel_size)+i)>-1 && ((int)((GetMouseX()-grid_x)/pixel_size)+i)<NO_PIXEL) && (((int)((GetMouseY()-grid_y)/pixel_size)+y)>-1 && ((int)((GetMouseY()-grid_y)/pixel_size)+y)<NO_PIXEL))
+                        {
+                            if (mirror)
+                            {
+                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                                grid[(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                            }
+                            else
+                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                        }
+        }
         status = "Eraser";
 
         }
+
+    
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if ((GetMouseX()<=colorPalette_x+5*20) && (GetMouseY()<=colorPalette_y+7*20) && (GetMouseX()>=colorPalette_x) && (GetMouseY()>=colorPalette_y))
+            {
+                if (switch_palette == 1)
+                    present_color = color_list1[(((GetMouseX()-colorPalette_x)/20)+((GetMouseY()-colorPalette_y)/20)*5)*pixel_size_in_palette];
+                if (switch_palette == 2)
+                    present_color = color_list2[(((GetMouseX()-colorPalette_x)/20)+((GetMouseY()-colorPalette_y)/20)*5)*pixel_size_in_palette];
+                if (switch_palette == 3)
+                    present_color = color_list3[(((GetMouseX()-colorPalette_x)/20)+((GetMouseY()-colorPalette_y)/20)*5)*pixel_size_in_palette];
+                status = "New Color Picked";
+            }
+    }
 
     if (IsKeyPressed(KEY_G))
     {
         status = "Grid";
         grid_lines = !grid_lines;
     }
+
+    if (IsKeyPressed(KEY_X))
+    {
+        status = "Centre";
+        show_centre = !show_centre;
+    }
+
+    if (IsKeyPressed(KEY_M))
+    {
+        mirror = !mirror;
+    }
+
+    if (IsKeyPressed(KEY_LEFT_BRACKET))
+        if (pencil_size>2)pencil_size-=2;
+
+
+    if (IsKeyPressed(KEY_RIGHT_BRACKET))
+        pencil_size+=2;
 
     if (IsKeyPressed(KEY_C))
     {
@@ -114,14 +172,19 @@ void keyStrokes()
                 grid[row][column]= {0,0,0,0};
     }
 
-    if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_S)))
+    if(IsKeyPressed(KEY_E))
     {
         Image p_img = GenImageColor(NO_PIXEL, NO_PIXEL, ((Color){0,0,0,0}));
         for(int row=0; row<NO_PIXEL; row++)
             for(int column=0; column<NO_PIXEL; column++)
-                ImageDrawPixel(&p_img, row+1, column+1, grid[row][column]);
+                ImageDrawPixel(&p_img, row, column, grid[row][column]);
         
-        ExportImage(p_img, TextFormat("%03i.png",img_no));
+        if (FileExists(TextFormat("%03i.png",img_no)))
+        {
+            ExportImage(p_img, TextFormat("%03i_%03i.png",session,img_no));
+        } 
+        else
+            ExportImage(p_img, TextFormat("%03i.png",img_no));
         img_no++;
         UnloadImage(p_img);
         status = "Image Exported";
@@ -130,12 +193,16 @@ void keyStrokes()
      if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_N)))
     {
         frames.push_back(grid);
-        status = "Image Exported";
+        status = "New Frame";
     }
+
+    if (IsKeyPressed(KEY_P))
+    {
+       if (switch_palette >2)switch_palette=0;
+        switch_palette++; 
+    }
+        
 }
-
-
-
 void drawGrid()
 {
     for(int row=0; row<NO_PIXEL; row++)
@@ -146,9 +213,14 @@ void drawGrid()
     if (grid_lines)
     {
         for(int i=1; i<NO_PIXEL; i++)
-            DrawLine(grid_x, (i*pixel_size)+grid_y, grid_x+canvas_side, ((i*pixel_size)+grid_y), (Color){50,50,50,255});
+            DrawLine(grid_x, (i*pixel_size)+grid_y, grid_x+canvas_side-3, ((i*pixel_size)+grid_y), (Color){50,50,50,255});
         for(int i=1; i<NO_PIXEL; i++)
-            DrawLine((i*pixel_size)+grid_x, grid_y, (i*pixel_size)+grid_x, grid_y+canvas_side, (Color){50,50,50,255});
+            DrawLine((i*pixel_size)+grid_x, grid_y, (i*pixel_size)+grid_x, grid_y+canvas_side-3, (Color){50,50,50,255});
+    }
+    if (show_centre)
+    {
+        DrawLine((grid_x+canvas_side/2)-1.5, grid_y, (grid_x+canvas_side/2)-1.5, grid_y+canvas_side-2, (Color){255,100,100,255});
+        DrawLine(grid_x, (grid_y+canvas_side/2)-2, grid_x+canvas_side-1.5, (grid_y+canvas_side/2)-2, (Color){255,100,100,255});
     }
 
     for(int row=0; row<NO_PIXEL; row++)
@@ -156,23 +228,33 @@ void drawGrid()
                 DrawRectangle((row*(int)(pixel_size/4))+grid_x+canvas_side+10, (column*(int)(pixel_size/4))+grid_y, (int)(pixel_size/4), (int)(pixel_size/4), grid[row][column]); 
     DrawRectangleLines(grid_x+canvas_side+10, grid_y, canvas_side/4-8, canvas_side/4-8, (Color){80,80,80,255});   
 
-    for(int frame=0;frame<=frames.size()-1;frame++)
-        for(int row=0; row<NO_PIXEL; row++)
-            for(int column=0; column<NO_PIXEL; column++)
-                  DrawRectangle(
-                    ((row*(int)(pixel_size/6))+canvas_side-30)+frame*(canvas_side/6)-25,
-                    (column*(int)(pixel_size/6))+canvas_side-(canvas_side/6)+10,
-                    (int)(pixel_size/6),
-                    (int)(pixel_size/6),
-                    frames[frame][row][column]);     
+    if (frames.size()>0)
+    {
+        for(unsigned int frame=0;frame<frames.size();frame++)
+            for(int row=0; row<NO_PIXEL; row++)
+                for(int column=0; column<NO_PIXEL; column++)
+                      DrawRectangle(
+                        row*(int)(pixel_size/6)+550+frame*68,
+                        (column*(int)(pixel_size/6))+grid_y,
+                        (int)(pixel_size/6),
+                        (int)(pixel_size/6),
+                        frames[frame][row][column]); 
+    }
+      
 }
-
 void drawColors(int no_rows, int size)
 {
-    for(int row=0;row<=31;row++)//list_color number
-        DrawRectangle(colorOptions_x+size*(row>=no_rows?row-no_rows*(row/no_rows):row),colorOptions_y+size*(row/no_rows), size, size, list_colors[row]);
+    for(int row=0;row<32;row++)
+    {
+        if (switch_palette == 1)
+            DrawRectangle(colorPalette_x+size*(row>=no_rows?row-no_rows*(row/no_rows):row),colorPalette_y+size*(row/no_rows), size, size, color_list1[row*pixel_size_in_palette]);
+        if (switch_palette == 2)
+            DrawRectangle(colorPalette_x+size*(row>=no_rows?row-no_rows*(row/no_rows):row),colorPalette_y+size*(row/no_rows), size, size, color_list2[row*pixel_size_in_palette]);
+        if (switch_palette == 3)
+            DrawRectangle(colorPalette_x+size*(row>=no_rows?row-no_rows*(row/no_rows):row),colorPalette_y+size*(row/no_rows), size, size, color_list3[row*pixel_size_in_palette]);
+    }
+        
 }
-
 void printData()
 {
 
@@ -186,4 +268,11 @@ void printData()
         TextFormat("%03i,%03i",m_x,m_y),10,435, 12,(Color){255,255,255,255});
     DrawText(
         status,70,435, 12,(Color){255,255,255,255});
+    if (mirror)
+        DrawText(
+        "M",canvas_side+grid_x-42,435,12,(Color){255,255,255,255});
+    DrawText(
+        TextFormat("%0i",pencil_size),canvas_side+grid_x-30,435,12,(Color){255,255,255,255});
+    DrawRectangle(
+        canvas_side+grid_x-16,435,15,10,present_color);
 }
