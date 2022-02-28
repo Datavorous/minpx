@@ -32,3 +32,7 @@ You may modify it and use it yourself btw.
 * ```G``` - Toggle Grid Display
 * ```X``` - Toggle Centre Grid Display
 * ```P``` - Toggle Between 3 Color Palettes
+
+## Warning 
+
+Comment down these lines -
