@@ -38,3 +38,11 @@ You may modify it and use it yourself btw.
 * ```Down Arrow Key``` - Decrease FPS Of The Animation
 * ```Right Arrow Key``` - Goto Next Frame For Editing
 * ```Left Arrow Key``` - Goto Previous Frame For Editing
+
+## Notes
+
+Feel Free to Contribute! I haven't faced any bugs yet, but if you find any, please make an Issue!
+- - - -
+
+**Made with ♥️ and <a href="https://raylib.com/">raylib</a>**
+
