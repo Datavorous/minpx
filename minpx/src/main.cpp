@@ -15,12 +15,19 @@ int img_no = 0;
 int pencil_size = 1;
 int pixel_size_in_palette = 8;
 int switch_palette = 1;
+
+int currentFrameEditing = 0;
+int currentFrame = 0;
+int framesCounter = 0;
+int framesSpeed = 2;
+
 int session;
 short m_x,m_y;
 char *status = "";
 bool mirror = false;
 bool grid_lines = false;
 bool show_centre = false;
+bool playAnim = false;
 
 vector< vector<Color> > grid;
 vector<vector< vector<Color> >> frames;
@@ -37,6 +44,7 @@ void keyStrokes(void);
 void drawGrid(void);
 void printData(void);
 void drawColors(int,int);
+void drawAnimation(int);
 
 int main(void)
 {
@@ -61,13 +69,15 @@ int main(void)
             i_grid.push_back((Color){0,0,0,0});
         grid.push_back(i_grid);
     }
-    //frames.push_back(grid);
+    frames.push_back(grid);
 
     InitWindow(SCREEN_W, SCREEN_H, "minpx");
+    SetTargetFPS(60);
     Texture2D checked = LoadTexture("res/checked.png");
     Texture2D checked2 = LoadTexture("res/checked2.png");
     while (!WindowShouldClose())
     {
+        
         BeginDrawing();
         ClearBackground((Color){12,12,12}); 
             DrawTexture(checked,grid_x,grid_y,WHITE);
@@ -76,6 +86,7 @@ int main(void)
             drawColors(5,20);
             printData();
         EndDrawing();
+        framesCounter++;
         keyStrokes(); 
     }
     UnloadTexture(checked);
@@ -95,11 +106,11 @@ void keyStrokes()
 
                             if (mirror)
                             {
-                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
-                                grid[(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                                frames[currentFrameEditing][((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                                frames[currentFrameEditing][(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
                             }
                             else
-                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
+                                frames[currentFrameEditing][((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = present_color;
                         }
                 status = "Pencil";
             }
@@ -115,11 +126,11 @@ void keyStrokes()
                         {
                             if (mirror)
                             {
-                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
-                                grid[(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                                frames[currentFrameEditing][((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                                frames[currentFrameEditing][(NO_PIXEL - 1 - ((int)((GetMouseX()-grid_x)/pixel_size)+i))][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
                             }
                             else
-                                grid[((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
+                                frames[currentFrameEditing][((int)((GetMouseX()-grid_x)/pixel_size)+i)][((int)((GetMouseY()-grid_y)/pixel_size)+y)] = (Color){0,0,0,0};
                         }
         }
         status = "Eraser";
@@ -169,15 +180,15 @@ void keyStrokes()
     {
         for(int row=0; row<NO_PIXEL; row++)
             for(int column=0; column<NO_PIXEL; column++)
-                grid[row][column]= {0,0,0,0};
+                frames[currentFrameEditing][row][column]= {0,0,0,0};
     }
-
+/*
     if(IsKeyPressed(KEY_E))
     {
         Image p_img = GenImageColor(NO_PIXEL, NO_PIXEL, ((Color){0,0,0,0}));
         for(int row=0; row<NO_PIXEL; row++)
             for(int column=0; column<NO_PIXEL; column++)
-                ImageDrawPixel(&p_img, row, column, grid[row][column]);
+                ImageDrawPixel(&p_img, row, column, frames[currentFrameEditing][row][column]);
         
         if (FileExists(TextFormat("%03i.png",img_no)))
         {
@@ -189,10 +200,12 @@ void keyStrokes()
         UnloadImage(p_img);
         status = "Image Exported";
     }
-
+*/
      if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_N)))
     {
-        frames.push_back(grid);
+        
+        frames.push_back(frames[currentFrameEditing]);
+        currentFrameEditing++;
         status = "New Frame";
     }
 
@@ -201,14 +214,48 @@ void keyStrokes()
        if (switch_palette >2)switch_palette=0;
         switch_palette++; 
     }
+
+
+    if (IsKeyPressed(KEY_RIGHT))
+        if (currentFrameEditing<frames.size()-1)currentFrameEditing++;
+    if (IsKeyPressed(KEY_LEFT))
+        if (currentFrameEditing>0)currentFrameEditing--;
+    if (IsKeyPressed(KEY_UP))
+        framesSpeed++;
+    if (IsKeyPressed(KEY_DOWN))
+        if (framesSpeed>1)framesSpeed--;
+    if (IsKeyPressed(KEY_SPACE))
+        playAnim = !playAnim;
+
+
+    if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_E)))
+    {
+        
+        for (int imgs=0;imgs<frames.size();imgs++)
+        {
+            Image p_img = GenImageColor(NO_PIXEL, NO_PIXEL, ((Color){0,0,0,0}));
+                for(int row=0; row<NO_PIXEL; row++)
+                    for(int column=0; column<NO_PIXEL; column++)
+                        ImageDrawPixel(&p_img, row, column, frames[imgs][row][column]);
+                
+                ExportImage(p_img, TextFormat("%03i.png",img_no));
+                img_no++;
+                UnloadImage(p_img);
+        }     
+        status = "Image Exported";
+    }
         
 }
 void drawGrid()
 {
     for(int row=0; row<NO_PIXEL; row++)
         for(int column=0; column<NO_PIXEL; column++)
-                DrawRectangle((row*pixel_size)+grid_x, (column*pixel_size)+grid_y, pixel_size, pixel_size, grid[row][column]); 
+        {
+            
+            DrawRectangle((row*pixel_size)+grid_x, (column*pixel_size)+grid_y, pixel_size, pixel_size, frames[currentFrameEditing][row][column]); 
+        }        
     DrawRectangleLines(grid_x, grid_y, canvas_side-3, canvas_side-3, (Color){50,50,50,255});    
+    DrawRectangleLines(grid_x+canvas_side+10, grid_y, canvas_side/4-8, canvas_side/4-8, (Color){80,80,80,255});   
 
     if (grid_lines)
     {
@@ -223,25 +270,46 @@ void drawGrid()
         DrawLine(grid_x, (grid_y+canvas_side/2)-2, grid_x+canvas_side-1.5, (grid_y+canvas_side/2)-2, (Color){255,100,100,255});
     }
 
-    for(int row=0; row<NO_PIXEL; row++)
-        for(int column=0; column<NO_PIXEL; column++)
-                DrawRectangle((row*(int)(pixel_size/4))+grid_x+canvas_side+10, (column*(int)(pixel_size/4))+grid_y, (int)(pixel_size/4), (int)(pixel_size/4), grid[row][column]); 
-    DrawRectangleLines(grid_x+canvas_side+10, grid_y, canvas_side/4-8, canvas_side/4-8, (Color){80,80,80,255});   
+    if (framesCounter >= 60/framesSpeed)
+        {
+            framesCounter = 0;
+            if (frames.size()>=1)
+                {
+                    currentFrame++;
+                    if (currentFrame==frames.size())
+                        currentFrame = 0;
+                }
+        }
 
+    if (!(playAnim))currentFrame=currentFrameEditing;
     if (frames.size()>0)
-    {
-        for(unsigned int frame=0;frame<frames.size();frame++)
-            for(int row=0; row<NO_PIXEL; row++)
-                for(int column=0; column<NO_PIXEL; column++)
-                      DrawRectangle(
-                        row*(int)(pixel_size/6)+550+frame*68,
-                        (column*(int)(pixel_size/6))+grid_y,
-                        (int)(pixel_size/6),
-                        (int)(pixel_size/6),
-                        frames[frame][row][column]); 
-    }
+        drawAnimation(currentFrame);
+
       
 }
+
+
+void drawAnimation(int da_frame)
+{
+    for(int row=0; row<NO_PIXEL; row++)
+                for(int column=0; column<NO_PIXEL; column++)
+                      /*DrawRectangle(
+                        row*(int)(pixel_size/4)+440,
+                        (column*(int)(pixel_size/4))+grid_y+265,
+                        (int)(pixel_size/4),
+                        (int)(pixel_size/4),
+                        frames[da_frame][row][column]); 
+                        */
+                        DrawRectangle(
+                            (row*(int)(pixel_size/4))+grid_x+canvas_side+10,
+                             (column*(int)(pixel_size/4))+grid_y,
+                              (int)(pixel_size/4),
+                               (int)(pixel_size/4),
+                                frames[da_frame][row][column]); 
+
+
+}
+
 void drawColors(int no_rows, int size)
 {
     for(int row=0;row<32;row++)
@@ -275,4 +343,9 @@ void printData()
         TextFormat("%0i",pencil_size),canvas_side+grid_x-30,435,12,(Color){255,255,255,255});
     DrawRectangle(
         canvas_side+grid_x-16,435,15,10,present_color);
+
+    DrawText(TextFormat("Paused: %0s",(playAnim?"No":"Yes")),grid_x+canvas_side+10,270,12,(Color){255,255,255,255});
+    DrawText(TextFormat("Editing Frame: %0i",currentFrameEditing+1),grid_x+canvas_side+10,290,12,(Color){255,255,255,255});
+    DrawText(TextFormat("FPS: %0i",framesSpeed),grid_x+canvas_side+10,330,12,(Color){255,255,255,255});
+    DrawText(TextFormat("Frames: %0i",frames.size()),grid_x+canvas_side+10,310,12,(Color){255,255,255,255});
 }
