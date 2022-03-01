@@ -5,10 +5,10 @@ minpx</h1>
 ## Screenshots
 <img src="https://github.com/Datavorous/minpx/blob/main/media/2.PNG?raw=true">
 <br>
-<img src="https://github.com/Datavorous/minpx/blob/main/media/3.PNG?raw=true">
+<img src="https://github.com/Datavorous/minpx/blob/main/media/VID-20220301-WA0000.gif?raw=true">
 
 ## Introduction
-This is merely a hobby project. I'll only add essential features to it which I think are required.<br>
+This is merely a hobby project. It already has all the features which I need for making pixel art for games. I'll only add essential features to it which I think are required, maybe in the future.<br>
 You may modify it and use it yourself btw.
 
 ## Features
@@ -18,7 +18,7 @@ You may modify it and use it yourself btw.
 * Mirror
 * Adjustable Brush/Eraser Size
 * Grid Lines 
-* Frame By Frame Animation (WIP)
+* Frame By Frame Animation
 
 ## Controls
 
@@ -26,13 +26,15 @@ You may modify it and use it yourself btw.
 * ```LMB(Pressed Once)``` - Pick New Color 
 * ```RMB(Down)``` - Erase Pixels On Canvas
 * ```[``` and ```]``` - Decrease Or Increase Brush/Eraser Size
-* ```E``` - Export Image
+* ```Ctrl + E``` - Export All The Frames As Images
 * ```M``` - Toggle Mirror Mode
 * ```C``` - Clear Canvas
 * ```G``` - Toggle Grid Display
 * ```X``` - Toggle Centre Grid Display
 * ```P``` - Toggle Between 3 Color Palettes
-
-## Warning 
-
-Comment down the lines ```231 - 242``` , because animation system is not functional yet.
+* ```Space``` - Play/Pause Animation
+* ```Ctrl + N``` - New Frame
+* ```Up Arrow Key``` - Increase FPS Of The Animation
+* ```Down Arrow Key``` - Decrease FPS Of The Animation
+* ```Right Arrow Key``` - Goto Next Frame For Editing
+* ```Left Arrow Key``` - Goto Previous Frame For Editing
