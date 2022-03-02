@@ -5,7 +5,7 @@ minpx</h1>
 ## Screenshots
 <img src="https://github.com/Datavorous/minpx/blob/main/media/2.PNG?raw=true">
 <br>
-<img src="https://github.com/Datavorous/minpx/blob/main/media/VID-20220301-WA0000.gif?raw=true">
+<img src="https://raw.githubusercontent.com/Datavorous/minpx/main/media/anim.gif">
 
 ## Introduction
 This is merely a hobby project. It already has all the features which I need for making pixel art for games. I'll only add essential features to it which I think are required, maybe in the future.<br>
