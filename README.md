@@ -44,7 +44,7 @@ Note: 8x8,16x16 and 32x32 Canvases Are Only Supported
 
 ## Notes
 
-Feel Free to Contribute! I haven't faced any bugs yet, but if you find any, please make an Issue!
+Feel Free to Contribute! Please make an Issue if you encounter any Bug!
 - - - -
 
 **Made with ♥️ and <a href="https://raylib.com/">raylib</a>**
