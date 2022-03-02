@@ -1,15 +1,18 @@
 #include "raylib.h"
+#include <conio.h>
+#include <dir.h>
+#include <process.h>
 #include <vector>
 #define SCREEN_H 450
 #define SCREEN_W 560
 using namespace std;
 
 const int canvas_side = 420;
-const int NO_PIXEL = 32;
-const int pixel_size = canvas_side/NO_PIXEL;
+int NO_PIXEL=32;
+double pixel_size=canvas_side/NO_PIXEL;
 const int grid_x = 10;
 const int grid_y = 10;
-const int colorPalette_x = grid_x+canvas_side+10;
+const int colorPalette_x = 440; 
 const int colorPalette_y = 120;
 int img_no = 0;
 int pencil_size = 1;
@@ -21,13 +24,14 @@ int currentFrame = 0;
 int framesCounter = 0;
 int framesSpeed = 2;
 
-int session;
+int session = 0;
 short m_x,m_y;
 char *status = "";
 bool mirror = false;
 bool grid_lines = false;
 bool show_centre = false;
 bool playAnim = false;
+bool chosen = false;
 
 vector< vector<Color> > grid;
 vector<vector< vector<Color> >> frames;
@@ -40,15 +44,17 @@ Image color_palette_img1;
 Image color_palette_img2;
 Image color_palette_img3;
 
+
 void keyStrokes(void);
 void drawGrid(void);
 void printData(void);
 void drawColors(int,int);
 void drawAnimation(int);
+void showChoices(void);
 
 int main(void)
 {
-    session = GetRandomValue(0,1000);
+
     color_palette_img1 = LoadImage("res/palette1.png"); 
     color_list1 = LoadImageColors(color_palette_img1);
     UnloadImage(color_palette_img1);
@@ -73,18 +79,30 @@ int main(void)
 
     InitWindow(SCREEN_W, SCREEN_H, "minpx");
     SetTargetFPS(60);
+    
+    session = LoadStorageValue(0) + 1;
+    SaveStorageValue(0, session);
+    mkdir(TextFormat("session_%i",session));
+
     Texture2D checked = LoadTexture("res/checked.png");
     Texture2D checked2 = LoadTexture("res/checked2.png");
     while (!WindowShouldClose())
     {
         
         BeginDrawing();
-        ClearBackground((Color){12,12,12}); 
-            DrawTexture(checked,grid_x,grid_y,WHITE);
-            DrawTexture(checked2,grid_x+canvas_side+10,grid_y,WHITE);
-            drawGrid();
-            drawColors(5,20);
-            printData();
+         
+            if (chosen)
+            {
+                ClearBackground((Color){12,12,12});
+                DrawTexture(checked,grid_x,grid_y,WHITE);
+                DrawTexture(checked2,grid_x+canvas_side+10,grid_y,WHITE);
+                drawGrid();
+                drawColors(5,20);
+                printData();
+            }
+            else 
+                showChoices();
+        
         EndDrawing();
         framesCounter++;
         keyStrokes(); 
@@ -101,7 +119,11 @@ void keyStrokes()
             {
                 for (int i = -pencil_size/2; i <= pencil_size/2; i++)
                     for (int y = -pencil_size/2; y <= pencil_size/2; y++)
-                        if ((((int)((GetMouseX()-grid_x)/pixel_size)+i)>-1 && ((int)((GetMouseX()-grid_x)/pixel_size)+i)<NO_PIXEL) && (((int)((GetMouseY()-grid_y)/pixel_size)+y)>-1 && ((int)((GetMouseY()-grid_y)/pixel_size)+y)<NO_PIXEL))
+                        if (((
+                            (int)((GetMouseX()-grid_x)/pixel_size)+i)>-1 && 
+                            ((int)((GetMouseX()-grid_x)/pixel_size)+i)<NO_PIXEL) && 
+                            (((int)((GetMouseY()-grid_y)/pixel_size)+y)>-1 && 
+                            ((int)((GetMouseY()-grid_y)/pixel_size)+y)<NO_PIXEL))
                         {
 
                             if (mirror)
@@ -182,28 +204,8 @@ void keyStrokes()
             for(int column=0; column<NO_PIXEL; column++)
                 frames[currentFrameEditing][row][column]= {0,0,0,0};
     }
-/*
-    if(IsKeyPressed(KEY_E))
-    {
-        Image p_img = GenImageColor(NO_PIXEL, NO_PIXEL, ((Color){0,0,0,0}));
-        for(int row=0; row<NO_PIXEL; row++)
-            for(int column=0; column<NO_PIXEL; column++)
-                ImageDrawPixel(&p_img, row, column, frames[currentFrameEditing][row][column]);
-        
-        if (FileExists(TextFormat("%03i.png",img_no)))
-        {
-            ExportImage(p_img, TextFormat("%03i_%03i.png",session,img_no));
-        } 
-        else
-            ExportImage(p_img, TextFormat("%03i.png",img_no));
-        img_no++;
-        UnloadImage(p_img);
-        status = "Image Exported";
-    }
-*/
      if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_N)))
     {
-        
         frames.push_back(frames[currentFrameEditing]);
         currentFrameEditing++;
         status = "New Frame";
@@ -238,7 +240,7 @@ void keyStrokes()
                     for(int column=0; column<NO_PIXEL; column++)
                         ImageDrawPixel(&p_img, row, column, frames[imgs][row][column]);
                 
-                ExportImage(p_img, TextFormat("%03i.png",img_no));
+                ExportImage(p_img, TextFormat("session_%i/%03i.png",session,img_no));
                 img_no++;
                 UnloadImage(p_img);
         }     
@@ -293,15 +295,8 @@ void drawAnimation(int da_frame)
 {
     for(int row=0; row<NO_PIXEL; row++)
                 for(int column=0; column<NO_PIXEL; column++)
-                      /*DrawRectangle(
-                        row*(int)(pixel_size/4)+440,
-                        (column*(int)(pixel_size/4))+grid_y+265,
-                        (int)(pixel_size/4),
-                        (int)(pixel_size/4),
-                        frames[da_frame][row][column]); 
-                        */
                         DrawRectangle(
-                            (row*(int)(pixel_size/4))+grid_x+canvas_side+10,
+                            (row*(int)(pixel_size/4))+440,
                              (column*(int)(pixel_size/4))+grid_y,
                               (int)(pixel_size/4),
                                (int)(pixel_size/4),
@@ -348,4 +343,42 @@ void printData()
     DrawText(TextFormat("Editing Frame: %0i",currentFrameEditing+1),grid_x+canvas_side+10,290,12,(Color){255,255,255,255});
     DrawText(TextFormat("FPS: %0i",framesSpeed),grid_x+canvas_side+10,330,12,(Color){255,255,255,255});
     DrawText(TextFormat("Frames: %0i",frames.size()),grid_x+canvas_side+10,310,12,(Color){255,255,255,255});
+}
+
+void showChoices()
+{
+    ClearBackground((Color){20,20,20,255});
+    DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,75,180,80}, 50, 50, 3, (Color){50,50,50,255});
+    DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,175,180,80}, 50, 50, 3, (Color){50,50,50,255});
+    DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,275,180,80}, 50, 50, 3, (Color){50,50,50,255});
+
+    DrawText("8 x 8",SCREEN_W/2-30,106,24,(Color){255,255,255,255});
+    DrawText("16 x 16",SCREEN_W/2-36,206,24,(Color){255,255,255,255});
+    DrawText("32 x 32",SCREEN_W/2-45,306,24,(Color){255,255,255,255});
+
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+        {
+            if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=75+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=75))
+            {
+               NO_PIXEL=8;
+               pixel_size=canvas_side/NO_PIXEL;
+               chosen = true;
+            }
+
+            if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=175+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=175))
+            {
+               NO_PIXEL=16;
+               pixel_size=canvas_side/NO_PIXEL;
+               chosen = true;
+            }
+
+            if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=275+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=275))
+            {
+               NO_PIXEL=32;
+               pixel_size=canvas_side/NO_PIXEL;
+               chosen = true;
+            }
+
+        }
+
 }
