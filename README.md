@@ -19,6 +19,9 @@ You may modify it and use it yourself btw.
 * Adjustable Brush/Eraser Size
 * Grid Lines 
 * Frame By Frame Animation
+* Automatically Creates A Folder In Each Session To Save The Exported Images
+- - - -
+Note: 8x8,16x16 and 32x32 Canvases Are Only Supported
 
 ## Controls
 
