@@ -8,7 +8,7 @@ minpx</h1>
 <img src="https://raw.githubusercontent.com/Datavorous/minpx/main/media/anim.gif">
 
 ## Introduction
-This is merely a hobby project. It already has all the features which I need for making pixel art for games. I'll only add essential features to it which I think are required, maybe in the future.<br>
+This is merely a hobby project. It already has all the features which I need for making pixel art. I'll only add essential features to it which I think are required, maybe in the future.<br>
 You may modify it and use it yourself btw.
 
 ## Features
