@@ -8,25 +8,30 @@
 using namespace std;
 
 const int canvas_side = 420;
-int NO_PIXEL=32;
-double pixel_size=canvas_side/NO_PIXEL;
 const int grid_x = 10;
 const int grid_y = 10;
 const int colorPalette_x = 440; 
 const int colorPalette_y = 120;
+
+int NO_PIXEL=32;
 int img_no = 0;
 int pencil_size = 1;
 int pixel_size_in_palette = 8;
 int switch_palette = 1;
-
 int currentFrameEditing = 0;
 int currentFrame = 0;
 int framesCounter = 0;
 int framesSpeed = 2;
-
+int count = 0;
 int session = 0;
+
+double pixel_size=canvas_side/NO_PIXEL;
+
 short m_x,m_y;
+
 char *status = "";
+char **droppedFiles = { 0 };
+
 bool mirror = false;
 bool grid_lines = false;
 bool show_centre = false;
@@ -40,10 +45,10 @@ Color present_color;
 Color* color_list1;
 Color* color_list2;
 Color* color_list3;
+Color* img_col;
 Image color_palette_img1;
 Image color_palette_img2;
 Image color_palette_img3;
-
 
 void keyStrokes(void);
 void drawGrid(void);
@@ -51,6 +56,7 @@ void printData(void);
 void drawColors(int,int);
 void drawAnimation(int);
 void showChoices(void);
+void file(void);
 
 int main(void)
 {
@@ -99,6 +105,7 @@ int main(void)
                 drawGrid();
                 drawColors(5,20);
                 printData();
+                file();
             }
             else 
                 showChoices();
@@ -109,6 +116,11 @@ int main(void)
     }
     UnloadTexture(checked);
     UnloadTexture(checked2);
+    UnloadImageColors(color_list1);
+    UnloadImageColors(color_list2);
+    UnloadImageColors(color_list3);
+    UnloadImageColors(img_col);
+    ClearDroppedFiles();
     CloseWindow();    
 }
 void keyStrokes()
@@ -187,17 +199,16 @@ void keyStrokes()
     }
 
     if (IsKeyPressed(KEY_M))
-    {
         mirror = !mirror;
-    }
-
     if (IsKeyPressed(KEY_LEFT_BRACKET))
         if (pencil_size>2)pencil_size-=2;
-
-
     if (IsKeyPressed(KEY_RIGHT_BRACKET))
         pencil_size+=2;
-
+    if (IsKeyPressed(KEY_F))
+    {
+        ClearDroppedFiles();
+        count = 0;
+    }  
     if (IsKeyPressed(KEY_C))
     {
         for(int row=0; row<NO_PIXEL; row++)
@@ -210,14 +221,11 @@ void keyStrokes()
         currentFrameEditing++;
         status = "New Frame";
     }
-
     if (IsKeyPressed(KEY_P))
     {
        if (switch_palette >2)switch_palette=0;
         switch_palette++; 
     }
-
-
     if (IsKeyPressed(KEY_RIGHT))
         if (currentFrameEditing<frames.size()-1)currentFrameEditing++;
     if (IsKeyPressed(KEY_LEFT))
@@ -228,11 +236,10 @@ void keyStrokes()
         if (framesSpeed>1)framesSpeed--;
     if (IsKeyPressed(KEY_SPACE))
         playAnim = !playAnim;
-
-
+    if ((IsMouseButtonDown(MOUSE_BUTTON_MIDDLE)) && ((GetMouseX()<=canvas_side+grid_x) && (GetMouseY()<=canvas_side+grid_y) && (GetMouseX()>=grid_x) && (GetMouseY()>=grid_y)))
+        present_color = frames[currentFrameEditing][((int)((GetMouseX()-grid_x)/pixel_size))][((int)((GetMouseY()-grid_y)/pixel_size))];
     if((IsKeyDown(KEY_LEFT_CONTROL)) && (IsKeyPressed(KEY_E)))
     {
-        
         for (int imgs=0;imgs<frames.size();imgs++)
         {
             Image p_img = GenImageColor(NO_PIXEL, NO_PIXEL, ((Color){0,0,0,0}));
@@ -253,12 +260,10 @@ void drawGrid()
     for(int row=0; row<NO_PIXEL; row++)
         for(int column=0; column<NO_PIXEL; column++)
         {
-            
             DrawRectangle((row*pixel_size)+grid_x, (column*pixel_size)+grid_y, pixel_size, pixel_size, frames[currentFrameEditing][row][column]); 
         }        
     DrawRectangleLines(grid_x, grid_y, canvas_side-3, canvas_side-3, (Color){50,50,50,255});    
     DrawRectangleLines(grid_x+canvas_side+10, grid_y, canvas_side/4-8, canvas_side/4-8, (Color){80,80,80,255});   
-
     if (grid_lines)
     {
         for(int i=1; i<NO_PIXEL; i++)
@@ -271,7 +276,6 @@ void drawGrid()
         DrawLine((grid_x+canvas_side/2)-1.5, grid_y, (grid_x+canvas_side/2)-1.5, grid_y+canvas_side-2, (Color){255,100,100,255});
         DrawLine(grid_x, (grid_y+canvas_side/2)-2, grid_x+canvas_side-1.5, (grid_y+canvas_side/2)-2, (Color){255,100,100,255});
     }
-
     if (framesCounter >= 60/framesSpeed)
         {
             framesCounter = 0;
@@ -282,14 +286,10 @@ void drawGrid()
                         currentFrame = 0;
                 }
         }
-
     if (!(playAnim))currentFrame=currentFrameEditing;
     if (frames.size()>0)
         drawAnimation(currentFrame);
-
-      
 }
-
 
 void drawAnimation(int da_frame)
 {
@@ -301,8 +301,6 @@ void drawAnimation(int da_frame)
                               (int)(pixel_size/4),
                                (int)(pixel_size/4),
                                 frames[da_frame][row][column]); 
-
-
 }
 
 void drawColors(int no_rows, int size)
@@ -316,17 +314,14 @@ void drawColors(int no_rows, int size)
         if (switch_palette == 3)
             DrawRectangle(colorPalette_x+size*(row>=no_rows?row-no_rows*(row/no_rows):row),colorPalette_y+size*(row/no_rows), size, size, color_list3[row*pixel_size_in_palette]);
     }
-        
 }
 void printData()
 {
-
     if ((GetMouseX()<=canvas_side+grid_x) && (GetMouseY()<=canvas_side+grid_y) && (GetMouseX()>=grid_x) && (GetMouseY()>=grid_y))
     {
         m_x = (int)((GetMouseX()-grid_x)/pixel_size)+1;
         m_y = (int)((GetMouseY()-grid_y)/pixel_size)+1;
     }
-    
     DrawText(
         TextFormat("%03i,%03i",m_x,m_y),10,435, 12,(Color){255,255,255,255});
     DrawText(
@@ -338,24 +333,20 @@ void printData()
         TextFormat("%0i",pencil_size),canvas_side+grid_x-30,435,12,(Color){255,255,255,255});
     DrawRectangle(
         canvas_side+grid_x-16,435,15,10,present_color);
-
     DrawText(TextFormat("Paused: %0s",(playAnim?"No":"Yes")),grid_x+canvas_side+10,270,12,(Color){255,255,255,255});
     DrawText(TextFormat("Editing Frame: %0i",currentFrameEditing+1),grid_x+canvas_side+10,290,12,(Color){255,255,255,255});
     DrawText(TextFormat("FPS: %0i",framesSpeed),grid_x+canvas_side+10,330,12,(Color){255,255,255,255});
     DrawText(TextFormat("Frames: %0i",frames.size()),grid_x+canvas_side+10,310,12,(Color){255,255,255,255});
 }
-
 void showChoices()
 {
     ClearBackground((Color){20,20,20,255});
     DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,75,180,80}, 50, 50, 3, (Color){50,50,50,255});
     DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,175,180,80}, 50, 50, 3, (Color){50,50,50,255});
     DrawRectangleRoundedLines((Rectangle){SCREEN_W/2-90,275,180,80}, 50, 50, 3, (Color){50,50,50,255});
-
     DrawText("8 x 8",SCREEN_W/2-30,106,24,(Color){255,255,255,255});
     DrawText("16 x 16",SCREEN_W/2-36,206,24,(Color){255,255,255,255});
     DrawText("32 x 32",SCREEN_W/2-45,306,24,(Color){255,255,255,255});
-
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
             if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=75+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=75))
@@ -364,21 +355,34 @@ void showChoices()
                pixel_size=canvas_side/NO_PIXEL;
                chosen = true;
             }
-
             if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=175+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=175))
             {
                NO_PIXEL=16;
                pixel_size=canvas_side/NO_PIXEL;
                chosen = true;
             }
-
             if ((GetMouseX()<=SCREEN_W/2-90+180) && (GetMouseY()<=275+80) && (GetMouseX()>=SCREEN_W/2-90) && (GetMouseY()>=275))
             {
                NO_PIXEL=32;
                pixel_size=canvas_side/NO_PIXEL;
                chosen = true;
             }
-
         }
-
+}
+void file()
+{
+    if (IsFileDropped() && (count==0))
+        {
+            droppedFiles = GetDroppedFiles(&count);
+            Image img = LoadImage(droppedFiles[0]); 
+            ImageResizeNN(&img, NO_PIXEL, NO_PIXEL);
+            ExportImage(img, "res/temp.png"); 
+            img_col = LoadImageColors(img);
+            UnloadImage(img);
+            for(int row=0; row<NO_PIXEL; row++)
+                for(int column=0; column<NO_PIXEL; column++)
+                    frames[currentFrameEditing][row][column] = img_col[row+column*NO_PIXEL];
+        }
+        if (count==0)
+            DrawText("F",canvas_side+grid_x-54,435,12,(Color){255,255,255,255});    
 }
