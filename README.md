@@ -12,7 +12,7 @@ This is merely a hobby project. It already has all the features which I need for
 You may modify it and use it yourself btw.
 
 ## Features
-* Low Memory Footprint
+* Low Memory Footprint (takes ~15 MB RAM)
 * **<a href="https://raw.githubusercontent.com/Datavorous/minpx/main/media/drop.gif">Importing Images</a> to Edit Them**
 * Multiple Color Palettes
 * ```.png``` Export
