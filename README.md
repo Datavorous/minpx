@@ -15,6 +15,7 @@ You may modify it and use it yourself btw.
 
 ## Features
 * Low Memory Footprint
+* **Importing Images to Edit Them**
 * Multiple Color Palettes
 * ```.png``` Export
 * Mirror
