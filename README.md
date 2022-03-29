@@ -22,7 +22,7 @@ You may modify it and use it yourself btw.
 * Frame By Frame Animation
 * Automatically Creates A Folder In Each Session To Save The Exported Images
 - - - -
-Note: 8x8,16x16 and 32x32 Canvases Are Only Supported
+Note: 16x16,32x32 and 64x64 Canvases Are Only Supported
 
 ## Controls
 
