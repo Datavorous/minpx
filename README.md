@@ -3,9 +3,9 @@ minpx</h1>
 <p align="center">A Minimalistic and Lightweight Pixel Art Editor!</p>
 
 ## Screenshots
-<img src="https://github.com/Datavorous/minpx/blob/main/media/demo2.PNG?raw=true" height="450" width="560">
+<img src="https://github.com/Datavorous/minpx/blob/main/media/demo2.PNG?raw=true">
 <br>
-<img src="https://raw.githubusercontent.com/Datavorous/minpx/main/media/demo1.PNG" height="450" width="560">
+<img src="https://raw.githubusercontent.com/Datavorous/minpx/main/media/demo1.PNG">
 
 ## Introduction
 This is merely a hobby project. It already has all the features which I need for making pixel art. I'll only add essential features to it which I think are required, maybe in the future.<br>
