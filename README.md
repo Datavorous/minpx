@@ -37,6 +37,8 @@ Note: 16x16,32x32 and 64x64 Canvases Are Only Supported
 * ```G``` - Toggle Grid Display
 * ```X``` - Toggle Centre Grid Display
 * ```P``` - Toggle Between 3 Color Palettes
+* ```A + I``` - Increase alpha of the chosen colour
+* ```A + D``` - Decrease alpha of the chosen colour
 * ```Space``` - Play/Pause Animation
 * ```Ctrl + N``` - New Frame
 * ```Up Arrow Key``` - Increase FPS Of The Animation
