@@ -14,9 +14,10 @@ You may modify it and use it yourself btw.
 ## Features
 * Low Memory Footprint (takes ~15 MB RAM)
 * **<a href="https://raw.githubusercontent.com/Datavorous/minpx/main/media/drop.gif">Importing Images</a> to Edit Them**
-* Multiple Color Palettes
+* Multiple Colour Palettes
 * ```.png``` Export
 * Mirror
+* Adjustable Colour Alpha
 * Adjustable Brush/Eraser Size
 * Grid Lines 
 * Frame By Frame Animation
@@ -49,6 +50,7 @@ Note: 16x16,32x32 and 64x64 Canvases Are Only Supported
 
 ## Notes
 
+You can drop some colour palettes in the ```minpx/build/res/``` folder and change its name to ```paletteX.png```, where X is 1,2 or 3. I had downloaded mine from lospec.com with each of 8x size.<br>
 Feel Free to Contribute! Please make an Issue if you encounter any Bug!
 - - - -
 
